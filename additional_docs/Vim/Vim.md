@@ -208,15 +208,19 @@ Vim のデフォルト設定では、現在のモードが左下に表示され�
 
 # デモ
 
-これは、動作しない [世界のナベアツ](https://ja.wikipedia.org/wiki/%E6%A1%82%E4%B8%89%E5%BA%A6) である：
+これは、動作しない不完全な [世界のナベアツ](https://ja.wikipedia.org/wiki/%E6%A1%82%E4%B8%89%E5%BA%A6) である：
+
+**■ 世界のナベアツ**
+
+> 3の倍数と3が付く数字（例:3、6、9、12、13、15、18、21、23、24、27、30、31、32、33、34、35、36、37、38、39…）のときだけアホになります
 
 ```python
 def sekaino_nabeatsu(limit):
   for i in range(limit):
     if i % 3 == 0:
-      print("アフォ！")
+      print("アホ！")
     if "3" in str(i):
-      print("アフォ！！")
+      print("アホ！！")
     if i % 3 != 0 and "3" not in str(i):
       print(i)
 
@@ -228,12 +232,14 @@ def main():
 
 - main 関数が呼ばれない
 - 0 から始まっているのを 1 に修正する
+- 10 までになっているのを 30 に修正する
 - アフォ！とアフォ！！が "3" や "36" でバラバラの行に出てしまう
-- 10 と固定されている上限を、コマンドラインから渡せるようにする
+- 10 (30) と固定されている上限を、コマンドラインから渡せるようにする
 
 # 練習
 
-先生と同じように vim をつかって nabeatsu.py を修正すること。
+1. 先生と同じように vim をつかって sekainonabeatsu.py を修正すること。
+2. 5 の倍数のときには犬っぽくなる処理も、vim をつかって追加せよ。
 
 # Vim チートシート
 チートとは「ずる」のことである。
@@ -242,3 +248,31 @@ def main():
 
 以下が、まずはお手軽かもしれない：  
 https://qiita.com/hattys2/items/56d973ad4f197b751501
+
+# .vimrc
+
+.vimrc は vim の初期設定用のファイルである。.vimrc をホームディレクトリ (~) に配置すると、その設定が反映される。
+
+以下の内容を ~/.vimrc として設定せよ：
+
+.vimrc:
+```sh
+ " vi との互換性はなし
+set nocompatible
+
+" タブキーで 4 スペース
+set ts=4
+set expandtab
+
+" シンタックスハイライト有効
+syntax enable
+
+" 行番号表示
+set number
+
+" 相対行番号表示
+set relativenumber
+
+" 画面下を 2 行に設定
+set laststatus=2
+```

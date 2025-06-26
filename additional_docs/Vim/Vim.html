@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vim.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="vim">Vim</h1>
+<p>とうとう、禁断の扉をあけるときが来てしまった。Vim エディタを紹介する日が。</p>
+<p>まず初めに言っておく。初めはとっつきにくい。
+ぜったいに「メモ帳のほうがいい！」だの「nano のほうがいい！」だの言い出すと断言する。
+クボタも初めて vi (Vim の元祖) に触れたときには、「なんだ、こんな使いにくいモノを作ったやつはアフォなのか？」と思った。</p>
+<p>それは若さゆえだった。甘かった。</p>
+<p>タッチタイピングができるようになるのと、Vim のコマンド体系が体に (指先の筋肉に) 記憶されるまで Vim につきあってみてほしい。</p>
+<p>その後は、いままでよりも数十倍の速度でプログラミングできるようになるはずである。</p>
+<p><strong>注意: ただし Vim は日本語の文章を書く作業には向かない。できないことはないけどね。文章を書くときには別のエディタを使用することをおすすめする。あくまでプログラミングだけだ。(英語だけなら Vim でも良かったんだけどねぇ…)</strong></p>
+<h1 id="%E4%B8%BB%E8%A6%81%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88%E3%82%A8%E3%83%87%E3%82%A3%E3%82%BF%E3%83%BB%E3%82%B3%E3%83%BC%E3%83%89%E3%82%A8%E3%83%87%E3%82%A3%E3%82%BF%E6%AF%94%E8%BC%83">主要テキストエディタ・コードエディタ比較</h1>
+<p>Vim のはなしの前に、現在流通している主要なエディタをいくつか紹介する。
+ここらへんは Gemini くんに書かせた。</p>
+<p>以下、Gemini くん。</p>
+<p>プログラミング、Web制作、文書作成など、様々な場面で活躍する主要なテキストエディタ・コードエディタを解説します。それぞれに特徴があり、目的や好みに合わせて選ぶのがおすすめです。</p>
+<hr>
+<h2 id="1-visual-studio-code-vs-code">1. Visual Studio Code (VS Code)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>開発元</strong></td>
+<td style="text-align:left">Microsoft</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>特徴</strong></td>
+<td style="text-align:left">豊富な拡張機能、強力なデバッグ機能、Git統合、動作が軽快</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>主な用途</strong></td>
+<td style="text-align:left">Web開発、各種プログラミング、スクリプト作成など、ほぼ全ての開発作業</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>対応OS</strong></td>
+<td style="text-align:left">Windows, macOS, Linux</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>価格</strong></td>
+<td style="text-align:left">無料</td>
+</tr>
+</tbody>
+</table>
+<p><strong>【解説】</strong>
+現在の開発シーンにおいて、<strong>最も広く使われているエディタの一つ</strong>です。豊富な拡張機能（Extensions）をインストールすることで、あらゆるプログラミング言語やフレームワークに対応できます。動作が比較的軽快でありながら、デバッグ機能やバージョン管理システム（Git）との連携も標準で強力。初心者からプロまで、幅広い層におすすめできる万能エディタです。</p>
+<p><strong>クボタ補足</strong>
+たしかに、いま Windows で選択するなら VS Code がファーストチョイスだろう。
+クボタもいまこの資料は VS Code を使って書いている。
+だが、あまりにも拡張性が高すぎて、便利に使えるようにといろいろ設定しているうちに、新しいトラブルに出くわしたりすることがある。注意だ。</p>
+<hr>
+<h2 id="2-vim--neovim">2. Vim / Neovim</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>開発元</strong></td>
+<td style="text-align:left">Bram Moolenaar (Vim), コミュニティ (Neovim)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>特徴</strong></td>
+<td style="text-align:left">キーボード中心の独特な操作、CUI環境での動作、カスタマイズ性が非常に高い</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>主な用途</strong></td>
+<td style="text-align:left">サーバー上でのファイル編集、熟練プログラマによる高速なコーディング</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>対応OS</strong></td>
+<td style="text-align:left">Windows, macOS, Linux, etc.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>価格</strong></td>
+<td style="text-align:left">無料</td>
+</tr>
+</tbody>
+</table>
+<p><strong>【解説】</strong>
+古くから存在する、キーボード操作に特化したエディタです。マウスを使わずに高速なテキスト編集ができるため、多くの熟練開発者に愛用されています。特にサーバーにSSHで接続して設定ファイルを編集するなど、CUI（キャラクターユーザーインターフェース）環境での作業に絶大な強みを発揮します。操作には慣れが必要ですが、一度習得すると手放せなくなるエディタです。「Neovim」はVimから派生した、よりモダンで拡張しやすくなったバージョンです。</p>
+<p><strong>クボタ補足</strong>
+授業でも触れたが 35 年近く vi, Vim を使ってプログラムを書いてきた。その技術がいまでも通用する。そして、それでもまだ知らない機能がある。奥が深い…。</p>
+<hr>
+<h2 id="3-emacs">3. Emacs</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>開発元</strong></td>
+<td style="text-align:left">Richard Stallman (GNU Emacs)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>特徴</strong></td>
+<td style="text-align:left">Vimと並ぶ高機能エディタ、Lisp言語による高い拡張性、「すべてがEmacs上で完結する」思想</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>主な用途</strong></td>
+<td style="text-align:left">プログラミング、文書作成、メール、スケジュール管理など</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>対応OS</strong></td>
+<td style="text-align:left">Windows, macOS, Linux, etc.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>価格</strong></td>
+<td style="text-align:left">無料</td>
+</tr>
+</tbody>
+</table>
+<p><strong>【解説】</strong>
+Vimと双璧をなす、歴史ある高機能エディタです。「エディタはOSである」と言われるほど拡張性が高く、プログラミングはもちろん、メールの送受信やファイルの管理、スケジュール管理まで、あらゆる作業をEmacs上で行うことができます。独自のキーバインドを持ち、こちらも習得には時間が必要ですが、自分だけの最強の作業環境を構築したいユーザーに支持されています。</p>
+<p><strong>クボタ補足</strong>
+VS Code 同様、拡張性が高すぎる。Emacs を立ち上げたらその中ですべてのことができる、という人もいる。拡張は Lisp というオタク度全開な言語で行う。初心者にはあまりにも高すぎるハードル。
+ちなみにクボタは Emacs の日本語化 (正確には世界の言語を扱えるようにした国際言語化) を行った方と一緒に仕事したことがある (なぞマウント)。UNIX 世界では憧れの人だ。</p>
+<hr>
+<h2 id="4-sublime-text">4. Sublime Text</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>開発元</strong></td>
+<td style="text-align:left">Sublime HQ</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>特徴</strong></td>
+<td style="text-align:left">圧倒的な動作の軽快さ、強力な検索・置換機能、洗練されたUI</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>主な用途</strong></td>
+<td style="text-align:left">大容量ファイルの閲覧・編集、軽快なコーディング、Web開発</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>対応OS</strong></td>
+<td style="text-align:left">Windows, macOS, Linux</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>価格</strong></td>
+<td style="text-align:left">有料（試用期間は無期限）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>【解説】</strong>
+VS Codeが登場する前に一世を風靡した高機能エディタです。最大の特徴は、何と言っても<strong>その圧倒的な動作の速さ</strong>。数GBクラスの巨大なログファイルでも軽々と開くことができます。強力な複数選択機能や「Goto Anything」による高速なファイル移動など、独自の機能も多く、今でも根強いファンがいます。</p>
+<h2 id="%E3%82%AF%E3%83%9C%E3%82%BF%E8%A3%9C%E8%B6%B3%E3%81%84%E3%81%A3%E3%81%A8%E3%81%8D%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%AF%E3%81%97%E3%81%A6%E7%AB%8B%E3%81%A1%E4%B8%8A%E3%81%92%E3%81%A6%E3%81%BF%E3%81%9F%E3%81%9D%E3%82%8C%E3%81%A0%E3%81%91"><strong>クボタ補足</strong>
+いっとき、インストールはして立ち上げてみた。それだけ。</h2>
+<h2 id="6-%E3%83%A1%E3%83%A2%E5%B8%B3-notepad--%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88%E3%82%A8%E3%83%87%E3%82%A3%E3%83%83%E3%83%88-textedit">6. メモ帳 (Notepad) / テキストエディット (TextEdit)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">項目</th>
+<th style="text-align:left">内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>開発元</strong></td>
+<td style="text-align:left">Microsoft / Apple</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>特徴</strong></td>
+<td style="text-align:left">OS標準搭載、非常にシンプル、起動が速い</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>主な用途</strong></td>
+<td style="text-align:left">ちょっとしたメモ、一時的なテキストの貼り付け</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>対応OS</strong></td>
+<td style="text-align:left">Windows / macOS</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>価格</strong></td>
+<td style="text-align:left">無料</td>
+</tr>
+</tbody>
+</table>
+<p><strong>【解説】</strong>
+Windowsの「メモ帳」やmacOSの「テキストエディット」は、OSに標準で付属する最もシンプルなエディタです。プログラミングには不向きですが、<strong>「とりあえずメモを取りたい」「余計な書式情報なしでテキストをコピーしたい」</strong> といった日常的な用途では非常に便利です。そのシンプルさと起動の速さは、他の高機能エディタにはない魅力と言えるでしょう。</p>
+<p><strong>クボタ補足</strong>
+たしかにメモ帳でプログラミングできる。が、検索もないし、行番号でジャンプもできないよ。それでもよければ、がんばってみよう。</p>
+<hr>
+<h3 id="%E3%81%BE%E3%81%A8%E3%82%81">まとめ</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">エディタ名</th>
+<th style="text-align:left">強み・キーワード</th>
+<th style="text-align:left">こんな人におすすめ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Visual Studio Code</strong></td>
+<td style="text-align:left">万能、拡張性、無料、デファクトスタンダード</td>
+<td style="text-align:left">ほぼ全ての人、特にWeb系開発者</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Vim / Neovim</strong></td>
+<td style="text-align:left">CUI、キーボード操作、高速編集、サーバー作業</td>
+<td style="text-align:left">サーバー管理者、キーボード操作を極めたい人</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Emacs</strong></td>
+<td style="text-align:left">超高機能、カスタマイズ性、Emacs内で完結</td>
+<td style="text-align:left">自分だけの最強環境を構築したい人</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Sublime Text</strong></td>
+<td style="text-align:left">軽快、高速、大容量ファイル</td>
+<td style="text-align:left">動作の速さを重視する人、巨大なログを扱う人</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>メモ帳など</strong></td>
+<td style="text-align:left">シンプル、OS標準、起動が速い</td>
+<td style="text-align:left">プログラミング以外の日常的なメモ</td>
+</tr>
+</tbody>
+</table>
+<h1 id="vim-%E3%82%A8%E3%83%87%E3%82%A3%E3%82%BF%E3%81%AB%E3%83%A2%E3%83%BC%E3%83%89%E3%81%82%E3%82%8A">Vim エディタにモードあり。</h1>
+<p>まず Vim にはいくつかのモードがある。</p>
+<ul>
+<li>通常: ファイル内を移動したり編集したりする場合</li>
+<li>挿入: テキストを挿入します</li>
+<li>置換: テキストを置換します</li>
+<li>ビジュアル（プレーン、ライン、またはブロック）：テキストブロックを選択する場合</li>
+<li>コマンドライン: コマンドを実行する</li>
+</ul>
+<p>タイプした文字は動作モードによって意味が異なる。たとえば、挿入モードのとき <code>x</code> は <code>x</code> という文字の入力だが、通常モードでは <code>x</code> は文字の削除である。ビジュアルモードでは選択範囲の削除となる。</p>
+<p>Vim のデフォルト設定では、現在のモードが左下に表示される。初期モード (デフォルト) は通常モードである。</p>
+<p><code>&lt;ESC&gt;</code> キーを押すとどのモードからでも通常モードになる。なので最初のうちはピーピーならすことになるだろう (<code>&lt;ESC&gt;</code> キーを連打することになるからだ)。</p>
+<ul>
+<li>
+<p><code>i</code> : 挿入モード</p>
+</li>
+<li>
+<p><code>R</code> : 置換モード</p>
+</li>
+<li>
+<p><code>c</code> : 変更モード</p>
+</li>
+<li>
+<p><code>v</code> : ビジュアルモード</p>
+</li>
+<li>
+<p><code>V</code> : ビジュアルラインモード</p>
+</li>
+<li>
+<p><code>&lt;CTRL&gt;-v</code>: ビジュアルブロックモード</p>
+<p>に入る。Vim を使うと <code>&lt;ESC&gt;</code> キーを頻繁に使う。</p>
+</li>
+</ul>
+<p><img src="image.png" alt="alt text"></p>
+<h2 id="%E5%9F%BA%E7%A4%8E%E7%B7%A8">基礎編</h2>
+<h3 id="%E3%83%86%E3%82%AD%E3%82%B9%E3%83%88%E3%81%AE%E6%8C%BF%E5%85%A5">テキストの挿入</h3>
+<p>通常モードから <code>i</code> を押して挿入モードにする。これで Vim は他のエディタと同じように動作する。
+そして <code>&lt;ESC&gt;</code> キーで通常モードに戻る。</p>
+<h3 id="%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%83%A9%E3%82%A4%E3%83%B3">コマンドライン</h3>
+<p>通常モードから <code>:</code> を押すとコマンドラインモードになる。<code>:</code>を押すとカーソルが画面の下にジャンプしたはずだ。このモードではファイルを開いたり、保存、クローズ、Vim の終了などができる。</p>
+<ul>
+<li>:q (:quit) 終了</li>
+<li>:w (:write) 保存 (書き込む)</li>
+<li>:wq (:writequit) 保存して終了</li>
+<li>:e filename ファイルを開く</li>
+<li>:r filename いまカーソルがある場所にファイルを挿入する</li>
+</ul>
+<h3 id="%E3%82%AB%E3%83%BC%E3%82%BD%E3%83%AB%E3%81%AE%E5%8B%95%E3%81%8D">カーソルの動き</h3>
+<p>カーソルは通常モードで動かす。</p>
+<ul>
+<li>基本的な動き：<code>hjkl</code> (左、下、上、右)</li>
+<li>単語: <code>w</code></li>
+<li>行: <code>0</code>, <code>$</code> (行頭、行末)</li>
+<li>スクロール: <code>&lt;CTRL&gt;-u</code>, <code>&lt;CTRL&gt;-d</code> (上、下)</li>
+<li>ファイル: <code>gg</code> (ファイルの先頭)、<code>G</code> (ファイルの末尾)</li>
+<li>行番号: <code>:行番号&lt;RET&gt;</code> または <code>行番号G</code></li>
+<li>探す: <code>/文字列</code> (下に向かって検索)、<code>?文字列</code> (上に向かって検索)
+<ul>
+<li>n/N つぎの一致に移動</li>
+</ul>
+</li>
+</ul>
+<h3 id="%E9%81%B8%E6%8A%9E">選択</h3>
+<ul>
+<li>ビジュアル: <code>v</code></li>
+<li>ビジュアルの行単位: <code>V</code></li>
+<li>ビジュアルのブロック: <code>&lt;CTRL&gt;-v</code></li>
+</ul>
+<h3 id="%E7%B7%A8%E9%9B%86">編集</h3>
+<ul>
+<li><code>o/O</code> 下/上に挿入</li>
+<li><code>dw, d$, d0</code> 単語の削除、行末まで削除、行頭まで削除</li>
+<li><code>cw</code> 単語の変更</li>
+<li><code>x</code> 文字の削除</li>
+<li><code>u</code> アンドゥ（取り消し）</li>
+<li><code>y</code> 選択範囲のコピー</li>
+<li><code>p</code> <code>y</code> でコピーしたものをペースト</li>
+</ul>
+<h3 id="%E5%9B%9E%E6%95%B0%E6%8C%87%E5%AE%9A">回数指定</h3>
+<ul>
+<li><code>3w</code> ３単語移動</li>
+<li><code>5j</code> ５行下に移動</li>
+<li><code>7dw</code> ７単語削除</li>
+</ul>
+<h1 id="%E3%83%87%E3%83%A2">デモ</h1>
+<p>これは、動作しない不完全な <a href="https://ja.wikipedia.org/wiki/%E6%A1%82%E4%B8%89%E5%BA%A6">世界のナベアツ</a> である：</p>
+<p><strong>■ 世界のナベアツ</strong></p>
+<blockquote>
+<p>3の倍数と3が付く数字（例:3、6、9、12、13、15、18、21、23、24、27、30、31、32、33、34、35、36、37、38、39…）のときだけアホになります</p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">sekaino_nabeatsu</span><span class="hljs-params">(limit)</span>:</span>
+  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> range(limit):
+    <span class="hljs-keyword">if</span> i % <span class="hljs-number">3</span> == <span class="hljs-number">0</span>:
+      print(<span class="hljs-string">"アホ！"</span>)
+    <span class="hljs-keyword">if</span> <span class="hljs-string">"3"</span> <span class="hljs-keyword">in</span> str(i):
+      print(<span class="hljs-string">"アホ！！"</span>)
+    <span class="hljs-keyword">if</span> i % <span class="hljs-number">3</span> != <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> <span class="hljs-string">"3"</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> str(i):
+      print(i)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">main</span><span class="hljs-params">()</span>:</span>
+  sekaino_nabeatsu(<span class="hljs-number">10</span>)
+</div></code></pre>
+<p>以下の問題を修正する：</p>
+<ul>
+<li>main 関数が呼ばれない</li>
+<li>0 から始まっているのを 1 に修正する</li>
+<li>10 までになっているのを 30 に修正する</li>
+<li>アフォ！とアフォ！！が &quot;3&quot; や &quot;36&quot; でバラバラの行に出てしまう</li>
+<li>10 (30) と固定されている上限を、コマンドラインから渡せるようにする</li>
+</ul>
+<h1 id="%E7%B7%B4%E7%BF%92">練習</h1>
+<ol>
+<li>先生と同じように vim をつかって sekainonabeatsu.py を修正すること。</li>
+<li>5 の倍数のときには犬っぽくなる処理も、vim をつかって追加せよ。</li>
+</ol>
+<h1 id="vim-%E3%83%81%E3%83%BC%E3%83%88%E3%82%B7%E3%83%BC%E3%83%88">Vim チートシート</h1>
+<p>チートとは「ずる」のことである。
+チートシートというのはコンパクトにまとめたコマンド一覧表のこと。
+ネット上にいろいろあるので、気に入ったものを探してみるのもよい。</p>
+<p>以下が、まずはお手軽かもしれない：<br>
+https://qiita.com/hattys2/items/56d973ad4f197b751501</p>
+<h1 id="vimrc">.vimrc</h1>
+<p>.vimrc は vim の初期設定用のファイルである。.vimrc をホームディレクトリ (~) に配置すると、その設定が反映される。</p>
+<p>以下の内容を ~/.vimrc として設定せよ：</p>
+<p>.vimrc:</p>
+<pre class="hljs"><code><div> <span class="hljs-string">" vi との互換性はなし
+set nocompatible
+
+"</span> タブキーで 4 スペース
+<span class="hljs-built_in">set</span> ts=4
+<span class="hljs-built_in">set</span> expandtab
+
+<span class="hljs-string">" シンタックスハイライト有効
+syntax enable
+
+"</span> 行番号表示
+<span class="hljs-built_in">set</span> number
+
+<span class="hljs-string">" 相対行番号表示
+set relativenumber
+
+"</span> 画面下を 2 行に設定
+<span class="hljs-built_in">set</span> laststatus=2
+</div></code></pre>
+
+</body>
+</html>
