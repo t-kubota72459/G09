@@ -18,13 +18,14 @@ def send_http(request_text):
     print(request_text)
 
     s = socket.socket()
+    s.settimeout(2)
     s.connect((PICO_IP, PICO_PORT))
     s.sendall(request_text.encode())
 
     response = s.recv(1024)
 
     print("----- RESPONSE -----")
-    print(response.decode())
+    print(response.decode(errors="replace"))
 
     s.close()
 
