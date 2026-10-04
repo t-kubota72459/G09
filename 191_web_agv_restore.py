@@ -1,11 +1,8 @@
 #
-# マイコン実習 第18回
+# マイコン実習 第19回
 # 復旧用基準版 Web AGV
 #
-# 第17回終了時の最低限の状態：
-#   FORWARD / BACK / STOP をWebから操作できる
-#
-# 第18回で追加する SPEED UP / SPEED DOWN は、まだ入れていない。
+# FORWARD / BACK / STOP / SPEED UP / SPEED DOWN を Web から操作できる。
 #
 
 from machine import Pin, PWM
@@ -39,6 +36,7 @@ PASSWORD = "picoagv00"     # 00 の部分を自分の出席番号にする（8�
 
 MOTOR_PWM_FREQ = 20000
 DRIVE_SPEED = 30000
+SPEED_STEP = 1000
 
 left_in1 = PWM(Pin(19))
 left_in2 = PWM(Pin(18))
@@ -147,18 +145,20 @@ while True:
         elif "GET /stop " in first_line:
             state = "STOP"
 
-        elif "GET /SPEED_UP " in first_line:
-            DRIVE_SPEED += 1000
+        elif "GET /speed_up " in first_line:
+            DRIVE_SPEED += SPEED_STEP
             # 65535 を越えない
             if DRIVE_SPEED > 65535:
                 DRIVE_SPEED = 65535
+            print("DRIVE_SPEED =", DRIVE_SPEED)
 
-        elif "GET /SPEED_DOWN " in first_line:
-            DRIVE_SPEED -= 1000
+        elif "GET /speed_down " in first_line:
+            DRIVE_SPEED -= SPEED_STEP
             # 0 を越えない
             if DRIVE_SPEED < 0:
                 DRIVE_SPEED = 0
-        
+            print("DRIVE_SPEED =", DRIVE_SPEED)
+
         elif "GET /favicon.ico " in first_line:
             # ブラウザが自動で要求する場合がある
             # モータの状態は変更しない
@@ -169,6 +169,8 @@ while True:
             go_forward(DRIVE_SPEED)
         elif state == "BACK":
             go_back(DRIVE_SPEED)
+        elif state == "STOP":
+            stop()
 
         # -------------------------------------------------
         # Webページを作る
@@ -205,7 +207,7 @@ while True:
                 </a>
               </p>
               <p>
-                <a href="/speed_up">
+                <a href="/speed_down">
                   <button style="font-size: 48px;">減速➖️</button>
                 </a>
               </p>
