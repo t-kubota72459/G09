@@ -1,11 +1,8 @@
 #
-# マイコン実習 第18回
+# マイコン実習 第19回
 # 復旧用基準版 Web AGV
 #
-# 第17回終了時の最低限の状態：
-#   FORWARD / BACK / STOP をWebから操作できる
-#
-# 第18回で追加する SPEED UP / SPEED DOWN は、まだ入れていない。
+# FORWARD / BACK / STOP / SPEED UP / SPEED DOWN を Web から操作できる。
 #
 
 from machine import Pin, PWM
@@ -147,13 +144,13 @@ while True:
         elif "GET /stop " in first_line:
             state = "STOP"
 
-        elif "GET /SPEED_UP " in first_line:
+        elif "GET /speed_up " in first_line:
             DRIVE_SPEED += 1000
             # 65535 を越えない
             if DRIVE_SPEED > 65535:
                 DRIVE_SPEED = 65535
 
-        elif "GET /SPEED_DOWN " in first_line:
+        elif "GET /speed_down " in first_line:
             DRIVE_SPEED -= 1000
             # 0 を越えない
             if DRIVE_SPEED < 0:
@@ -169,7 +166,10 @@ while True:
             go_forward(DRIVE_SPEED)
         elif state == "BACK":
             go_back(DRIVE_SPEED)
-
+        elif state == "STOP":
+            stop()
+            # 安全を考慮するなら DRIVE_SPEED をゼロにするのもあり
+            # DRIVE_SPEED = 0
         # -------------------------------------------------
         # Webページを作る
         # -------------------------------------------------
