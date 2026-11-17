@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b1018" />
+<title>KENTEI HMI / BCD Interface</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --base:#080d13; --surface:#121a25; --surface2:#182330; --edge:#2b3947;
+    --text:#e9eff5; --sub:#8da1ad; --faint:#58717f;
+    --mint:#60dfd0; --lime:#b8ed90; --coral:#ff574b; --warm:#f1c984;
+  }
+  * { box-sizing:border-box; }
+  html { background:var(--base); }
+  body { margin:0; min-height:100vh; color:var(--text); font-family:system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; -webkit-font-smoothing:antialiased;
+    background:radial-gradient(ellipse 95% 60% at 45% -18%,#244253 0%,transparent 72%), radial-gradient(ellipse 45% 35% at 100% 90%,#12202a 0%,transparent 70%),var(--base); }
+  body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.12;background-image:linear-gradient(90deg,#a7d0e4 1px,transparent 1px),linear-gradient(#a7d0e4 1px,transparent 1px);background-size:46px 46px;mask-image:linear-gradient(to bottom,#000,transparent 80%)}
+  button { font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  button:focus-visible { outline:2px solid var(--mint);outline-offset:3px; }
+  button:disabled { cursor:default;opacity:.5; }
+  .shell { width:min(1140px, calc(100% - 36px)); margin:0 auto; padding:30px 0 40px; }
+  .eyebrow { font-size:10px;font-weight:800;letter-spacing:.26em;color:var(--mint);text-transform:uppercase }
+  .topbar { display:flex; align-items:center;justify-content:space-between; gap:16px;margin-bottom:18px; }
+  .mark{display:flex; align-items:center;gap:13px; }
+  .symbol { display:grid;place-items:center;width:44px;height:44px;border:1px solid #538c98;border-radius:12px;background:linear-gradient(140deg,#14323d,#0a151e);box-shadow:inset 0 0 20px #1b3e4b,0 6px 23px #0005; }
+  .symbol svg {width:28px;height:28px;}
+  .brand{font-size:16px;letter-spacing:.16em;font-weight:900;line-height:1.2;}
+  .brand span{color:var(--mint)}
+  .brand small{display:block;margin-top:5px;font-size:9px;color:var(--sub);font-weight:650;letter-spacing:.2em}
+  .status{display:flex;align-items:center;gap:11px;border:1px solid #3a4c56;background:#121d27b8;border-radius:100px;padding:10px 15px;white-space:nowrap;box-shadow:inset 0 1px #ffffff0c; }
+  .led{display:inline-block;width:9px;height:9px;flex:0 0 auto;border-radius:50%;background:#8b6f54;box-shadow:0 0 0 4px #584c3918;}
+  .led.good{background:var(--mint);box-shadow:0 0 12px #60dfd0a3,0 0 0 4px #60dfd018}
+  .led.demo{background:var(--warm);box-shadow:0 0 12px #f1c98465,0 0 0 4px #f1c98418}
+  .led.bad{background:#f47c79;box-shadow:0 0 9px #f47c7955,0 0 0 4px #f47c7918}
+  .status-label{font-size:11px;font-weight:800;letter-spacing:.08em;}
+  .status-small{font-size:10px;color:var(--sub);display:block;margin-top:2px}
+  .hero { display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 20px;padding:20px 0 2px; }
+  .hero h1{font-size:clamp(25px,4.5vw,43px);font-weight:800;letter-spacing:-.04em;line-height:1.15;margin:8px 0 10px;}
+  .hero p{color:var(--sub);font-size:12px;line-height:1.8;margin:0;}
+  .hero-right{text-align:right;color:var(--faint);font-family:ui-monospace,monospace;font-size:11px;line-height:2;letter-spacing:.06em}
+  .panel { position:relative;overflow:hidden;border:1px solid #344654;border-radius:23px;background:linear-gradient(135deg,#1b2835 0%,#121d28 55%,#0e171f 100%);box-shadow:0 30px 80px #0007,inset 0 1px 0 #ffffff22; padding:22px; }
+  .panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 3px,#fff 4px,transparent 5px);opacity:.012;}
+  .screw{width:10px;height:10px;border-radius:50%;border:1px solid #536370;background:radial-gradient(circle at 34% 30%,#566877,#172330 72%);box-shadow:0 1px 3px #0008;position:absolute;z-index:2}
+  .screw:after{content:"";position:absolute;left:2px;right:2px;top:4px;height:1px;background:#74818d;transform:rotate(-35deg)}
+  .screw.tl{left:13px;top:13px}.screw.tr{right:13px;top:13px}.screw.bl{left:13px;bottom:13px}.screw.br{right:13px;bottom:13px}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3b4c58;padding:8px 12px 20px;margin:0 3px 20px;gap:14px}
+  .panel-head strong{font-size:12px;letter-spacing:.21em}
+  .panel-head .sys {color:#96abb5;font-size:10px;letter-spacing:.08em;font-family:ui-monospace,monospace}
+  .main-grid{display:grid;grid-template-columns:minmax(270px, .88fr) minmax(340px,1.12fr);gap:18px;}
+  .module { min-width:0;border:1px solid #354a58;border-radius:16px;background:linear-gradient(160deg,#1a2735,#111c26);padding:20px 22px 18px;box-shadow:inset 0 1px 0 #ffffff10,0 12px 22px #0003; }
+  .mod-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:15px;}
+  .mod-kicker{font-size:10px;font-weight:850;letter-spacing:.17em;color:var(--mint);margin-bottom:5px}
+  .mod-title{font-size:18px;font-weight:780;letter-spacing:.02em;}
+  .mod-sub {font-size:11px;color:var(--sub);margin-top:5px;}
+  .port-tag{border:1px solid #3c5562;border-radius:6px;padding:6px 9px;font:800 10px ui-monospace,monospace;color:#9ac8cf;letter-spacing:.08em;white-space:nowrap;}
+  .switch-bay{background:linear-gradient(#0a121b,#0f1c27);box-shadow:inset 0 0 0 1px #3b4c55,inset 0 15px 22px #0008;border-radius:15px;padding:15px;position:relative;}
+  .switch-bay:before,.display-bay:before{content:"";position:absolute;inset:6px;border:1px solid #ffffff0d;border-radius:11px;pointer-events:none}
+  .switch-row{display:flex;justify-content:center;align-items:center;gap:12px;min-height:171px;}
+  .touch-btn{display:grid;place-items:center;border:1px solid #45606b;background:linear-gradient(155deg,#334855,#172630);color:#b5d6de;border-radius:12px;width:58px;height:58px;box-shadow:inset 0 1px #ffffff29,0 5px 8px #0007;transition:transform .1s,filter .1s;}
+  .touch-btn:hover{filter:brightness(1.2)} .touch-btn:active{transform:translateY(2px);box-shadow:inset 0 2px 5px #0008;}
+  .touch-btn svg{width:26px;height:26px;stroke-width:2.7}
+  .wheel{width:105px;height:164px;border:5px solid #243641;border-radius:13px;background:linear-gradient(90deg,#0b131c,#263644 49%,#0b131c);padding:8px;box-shadow:inset 2px 2px 8px #0009,0 1px 0 #90b0bf4a;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .wheel .faded{font:700 19px ui-monospace,monospace;color:#687c88;opacity:.38;height:26px;}
+  .wheel .value{font:800 71px/.95 ui-monospace,SFMono-Regular,monospace;color:#fff;-webkit-text-fill-color:#fff;text-shadow:0 2px 1px #000;min-width:52px;text-align:center;}
+  .wheel .stripe{height:1px;width:100%;background:#68778252;margin:7px 0 4px}
+  .wheel-bottom{height:26px;font:700 19px ui-monospace,monospace;color:#687c88;opacity:.38}
+  .quick{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:13px;flex-wrap:wrap}
+  .quick button{min-width:29px;height:32px;border:1px solid #314b57;border-radius:7px;background:#142532;color:#9db4bf;font:700 13px ui-monospace,monospace;}
+  .quick button[aria-pressed="true"]{color:#06191c;border-color:var(--mint);background:var(--mint);box-shadow:0 0 10px #60dfd040}
+  .quick button:hover:not([aria-pressed="true"]){background:#2a4450;color:#fff}
+  .signal-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:18px;margin-top:17px;border-top:1px solid #334652}
+  .signal-card .lbl{color:var(--sub);font-size:10px;letter-spacing:.15em;font-weight:750}
+  .signal-card .num{font:800 14px ui-monospace,monospace;color:var(--mint);margin-top:6px;}
+  .bits{display:flex;justify-content:end;gap:8px;}
+  .bit{display:flex;flex-direction:column;align-items:center;gap:7px;font-family:ui-monospace,monospace}
+  .bit span{font-size:10px;color:#8ea1af}
+  .bit i{display:block;width:15px;height:15px;background:#253640;border:1px solid #50606a;border-radius:4px;box-shadow:inset 0 2px 4px #0008;transition:.2s}
+  .bit i.on{background:var(--mint);border-color:#90f6e7;box-shadow:0 0 15px #44ecca70,inset 0 1px #fff7}
+  .display-bay{position:relative;min-height:209px;background:linear-gradient(145deg,#0a1017,#131b25);box-shadow:inset 0 0 0 1px #3e4b57,inset 0 16px 28px #000a;border-radius:15px;padding:17px 22px 13px;}
+  .display-glass{position:relative;border:2px solid #263540;border-radius:14px;background:radial-gradient(ellipse at center,#25161b 0%,#100d13 67%,#080c12 100%);box-shadow:inset 0 4px 14px #000b,inset 0 1px #ffffff10,0 2px 0 #47545b;min-height:170px;display:flex;align-items:center;justify-content:center;gap:14px;padding:16px;}
+  .display-glass:before{content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;background:linear-gradient(162deg,#ffffff16,transparent 39% 80%,#ffffff06);}
+  .seven{height:137px;width:75px;overflow:visible;filter:drop-shadow(0 0 4px #ff3d3230)}
+  .seg{fill:#40272b;stroke:#6d3133;stroke-width:.7;opacity:.64;transition:fill .17s,opacity .17s,filter .17s}
+  .seg.lit{fill:#ff5b4e;stroke:#ff9584;opacity:1;filter:drop-shadow(0 0 4px #ff2f30) drop-shadow(0 0 9px #f83427)}
+  .display-legend{display:flex;align-items:center;justify-content:space-around;color:#8d9ca5;font:750 10px ui-monospace,monospace;letter-spacing:.16em;margin-top:13px}
+  .display-legend strong{color:#d1e1e6}
+  .dpl-bits{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px;}
+  .bit-bank{border:1px solid #2f4451;border-radius:9px;padding:10px 11px;background:#111f2a;}
+  .bit-bank .bank-title{display:flex;justify-content:space-between;gap:8px;font-size:10px;font-weight:750;letter-spacing:.04em;margin-bottom:10px;color:#abc2ca}
+  .bit-bank .bank-title b{color:var(--warm);font:800 12px ui-monospace,monospace}
+  .bit-bank .bits{justify-content:space-around;gap:4px}
+  .bit-bank .bit i.on{background:var(--coral);border-color:#fe877a;box-shadow:0 0 12px #fe554c70,inset 0 1px #fff7}
+  .bit-bank .bit span{font-size:9px}
+  .meta-row{display:flex;justify-content:space-between;gap:12px;margin-top:18px;align-items:center;flex-wrap:wrap}
+  .data-pill{border:1px solid #2a4b52;border-radius:100px;background:#112b31;padding:7px 11px;font:650 10px ui-monospace,monospace;color:#addad9;}
+  .data-pill.error{background:#3f2528;border-color:#6d4446;color:#ffb3b0}
+  .mini-note{color:#8195a1;font-size:10px;line-height:1.5}
+  .footer-grid {display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:20px}
+  .bottom-card{min-width:0;border:1px solid #263c49;border-radius:15px;background:#101c27b8;padding:16px 20px;}
+  .bottom-title{color:#afc8d0;font-size:10px;letter-spacing:.16em;font-weight:800;margin-bottom:13px}
+  .logs{font:11px/1.9 ui-monospace,SFMono-Regular,monospace;color:#8da8b6;height:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+  .log-line{overflow:hidden;text-overflow:ellipsis}.log-line b{font-weight:700;color:#60dfd0}.log-line .warn{color:#ffbf81}
+  .spec-table{width:100%;border-collapse:collapse;font:11px/1.5 ui-monospace,monospace;}
+  .spec-table th{text-align:left;color:#718d9a;font-weight:600;letter-spacing:.03em;padding:5px 0;border-bottom:1px solid #2d4450}
+  .spec-table td{padding:7px 0 0;color:#c2d2d9}
+  .test-area{display:none;align-items:center;justify-content:space-between;gap:12px;border:1px dashed #806c48;background:#2923189c;border-radius:12px;padding:12px 16px;margin-top:18px;flex-wrap:wrap}
+  .test-area.active{display:flex}
+  .test-area p{margin:0;font-size:10px;color:#dec493;line-height:1.6}
+  .test-buttons{display:flex;gap:8px}
+  .test-buttons button{background:#413926;color:#f6dfaa;border:1px solid #8c7654;border-radius:8px;padding:9px 13px;font-size:11px;font-weight:800}
+  .bottomline{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap;margin-top:18px;color:#708590;font:10px ui-monospace,monospace;letter-spacing:.04em}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  /* PCの横幅を活かしながら、ノートPCや24インチの高さが低いウィンドウで
+     ログと端子表まで1画面に納める。スマホレイアウトには影響しない。 */
+  @media (min-width:851px) and (max-height:960px) {
+    .shell{padding:13px 0 5px}
+    .topbar{margin-bottom:6px}
+    .symbol{width:40px;height:40px}
+    .status{padding:8px 13px}
+    .hero{padding:6px 0 0;margin-bottom:10px}
+    .hero h1{font-size:33px;margin:4px 0 5px}
+    .hero p{line-height:1.5}
+    .hero-right{line-height:1.6}
+    .panel{padding:13px 16px 14px;border-radius:18px}
+    .panel-head{padding:3px 11px 9px;margin:0 3px 10px}
+    .main-grid{gap:13px}
+    .module{padding:12px 16px 11px}
+    .mod-head{margin-bottom:8px}
+    .mod-kicker{margin-bottom:3px}
+    .mod-sub{margin-top:3px}
+    .switch-bay{padding:8px 12px 10px}
+    .switch-row{min-height:126px;gap:10px}
+    .wheel{height:126px;width:92px;padding:5px}
+    .wheel .faded,.wheel-bottom{height:18px;font-size:15px}
+    .wheel .value{font-size:58px}
+    .wheel .stripe{margin:4px 0 2px}
+    .touch-btn{width:52px;height:52px}
+    .quick{margin-top:6px;gap:5px}
+    .quick button{height:27px;min-width:27px;font-size:12px}
+    .signal-card{padding-top:9px;margin-top:8px}
+    .bit{gap:4px}
+    .meta-row{margin-top:9px}
+    .data-pill{padding:5px 9px}
+    .display-bay{min-height:0;padding:9px 14px 7px}
+    .display-glass{min-height:133px;padding:8px}
+    .seven{height:112px;width:66px}
+    .display-legend{margin-top:5px}
+    .dpl-bits{margin-top:8px}
+    .bit-bank{padding:8px 9px}
+    .bit-bank .bank-title{margin-bottom:6px}
+    .footer-grid{margin-top:11px;gap:12px}
+    .bottom-card{padding:10px 14px}
+    .bottom-title{margin-bottom:6px}
+    .logs{height:68px;line-height:1.6}
+    .spec-table th{padding:2px 0}
+    .spec-table td{padding:4px 0 0}
+    .bottomline{margin-top:7px}
+  }
+  /* 縦820px以上のPCでは視認性を優先して操作部を少し広げる */
+  @media (min-width:851px) and (min-height:875px) and (max-height:960px) {
+    .shell{padding-top:18px}
+    .topbar{margin-bottom:10px}
+    .hero{padding-top:10px;margin-bottom:14px}
+    .hero h1{font-size:35px;margin:6px 0 7px}
+    .panel{padding:17px 18px 18px}
+    .panel-head{padding-bottom:13px;margin-bottom:13px}
+    .module{padding:16px 18px 14px}
+    .mod-head{margin-bottom:11px}
+    .switch-bay{padding:10px 12px 12px}
+    .switch-row{min-height:141px}
+    .wheel{height:141px;width:98px}
+    .wheel .value{font-size:65px}
+    .quick{margin-top:9px}
+    .quick button{height:29px;min-width:28px}
+    .signal-card{padding-top:12px;margin-top:11px}
+    .meta-row{margin-top:12px}
+    .display-bay{padding:12px 16px 10px}
+    .display-glass{min-height:149px;padding:9px}
+    .seven{height:127px;width:70px}
+    .display-legend{margin-top:7px}
+    .dpl-bits{margin-top:11px}
+    .bit-bank{padding:9px 10px}
+    .footer-grid{margin-top:14px}
+    .bottom-card{padding:12px 16px}
+    .bottom-title{margin-bottom:9px}
+    .logs{height:76px}
+    .bottomline{margin-top:10px}
+  }
+  @media(max-width:850px){.main-grid{grid-template-columns:1fr}.module{padding:21px}.footer-grid{grid-template-columns:1fr}.hero-right{display:none}.display-glass{min-height:182px}.seven{height:150px;width:83px}}
+  @media(max-width:480px){.shell{width:calc(100% - 20px);padding-top:15px}.panel{padding:12px;border-radius:17px}.panel-head{padding:11px 14px 15px;margin-bottom:14px}.panel-head .sys{display:none}.hero{padding:13px 3px 0}.hero h1{font-size:26px}.topbar{padding:0 2px}.brand{font-size:13px}.symbol{width:39px;height:39px}.status{padding:9px 11px}.status-small{display:none}.main-grid{gap:12px}.module{padding:17px 13px}.mod-title{font-size:17px}.touch-btn{width:56px;height:56px}.switch-bay{padding:9px}.dpl-bits{gap:7px}.bit-bank{padding:9px 5px}.bit-bank .bit{gap:5px}.display-bay{padding:11px}.display-glass{gap:9px;padding:12px;min-height:162px}.seven{height:128px;width:70px}.quick{gap:3px}.quick button{min-width:26px;height:30px;font-size:12px}.footer-grid{gap:10px}.bottom-card{padding:15px}.bottomline{font-size:9px}}
+  @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="mark">
+      <div class="symbol" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="24" height="24" rx="5" stroke="#5CDECE" stroke-width="1.7"/><path d="M9 20H15V10H23M10 25H23V16" stroke="#A4F0E6" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+      <div class="brand">KENTEI<span> / HMI</span><small>INDUSTRIAL WEB CONTROL</small></div>
+    </div>
+    <div class="status" role="status" aria-live="polite"><span id="connLed" class="led demo"></span><span><span id="connLabel" class="status-label">接続確認中</span><span id="connDesc" class="status-small">HTTP / JSON</span></span></div>
+  </header>
+  <section class="hero">
+    <div><div class="eyebrow">Sequence control / grade 2 / prototype 07</div><h1>数字を、制御につなぐ。</h1><p>KENTEI作業盤のDSWとDPLを、ESP32のWeb I/Oとして再現する。</p></div>
+    <div class="hero-right">SIGNAL SPEC / BCD 8421<br>LOCAL CONTROL PANEL<br>REVISION 0.7</div>
+  </section>
+  <main class="panel" aria-label="KENTEI Web操作盤">
+    <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+    <div class="panel-head"><strong>OPERATOR STATION <span style="color:var(--mint)">/ 01</span></strong><span class="sys">INPUT → ESP32 LOGIC → OUTPUT&nbsp; /&nbsp; TB VIEW</span></div>
+    <div class="main-grid">
+      <section class="module" aria-labelledby="dswTitle">
+        <div class="mod-head"><div><div class="mod-kicker">01 / INPUT DEVICE</div><div id="dswTitle" class="mod-title">DSW <span style="font-weight:500;color:#9eb1bb">数字設定</span></div><div class="mod-sub">デジタルスイッチ・1桁 / 0–9</div></div><div class="port-tag">IN / 13–16</div></div>
+        <div class="switch-bay">
+          <div class="switch-row">
+            <button id="minus" class="touch-btn" type="button" aria-label="DSWを1減らす" title="−1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 7-7 7 7" transform="rotate(180 12 12)"/></svg></button>
+            <div class="wheel" aria-label="現在のDSW値"><div class="faded" id="wheelPrev">9</div><div class="stripe"></div><div class="value" id="dswValue">0</div><div class="stripe"></div><div class="wheel-bottom" id="wheelNext">1</div></div>
+            <button id="plus" class="touch-btn" type="button" aria-label="DSWを1増やす" title="+1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m5 15 7-7 7 7"/></svg></button>
+          </div>
+          <div class="quick" role="group" aria-label="DSW直接設定" id="quickNumbers"></div>
+        </div>
+        <div class="signal-card">
+          <div><div class="lbl">OUTPUT ENCODED / 8421</div><div class="num" id="dswBinary">0000</div></div>
+          <div class="bits" id="dswBits" aria-label="DSWのBCDビット"></div>
+        </div>
+        <div class="meta-row"><span class="data-pill" id="inputAck">INPUT / READY</span><span class="mini-note">TB 13=1 / 14=2 / 15=4 / 16=8</span></div>
+      </section>
+      <section class="module" aria-labelledby="dplTitle">
+        <div class="mod-head"><div><div class="mod-kicker">02 / OUTPUT DEVICE</div><div id="dplTitle" class="mod-title">DPL <span style="font-weight:500;color:#9eb1bb">7セグ表示</span></div><div class="mod-sub">2桁BCDデコード / ESP32からの出力</div></div><div class="port-tag">OUT / 26–33</div></div>
+        <div class="display-bay"><div class="display-glass" aria-label="7セグメント表示器">
+          <svg id="digitTens" class="seven" viewBox="0 0 110 200" role="img" aria-label="DPL2 十の位"></svg>
+          <svg id="digitUnits" class="seven" viewBox="0 0 110 200" role="img" aria-label="DPL1 一の位"></svg>
+        </div><div class="display-legend"><span>DPL2 / TENS</span><strong>BCD 8421</strong><span>DPL1 / UNITS</span></div></div>
+        <div class="dpl-bits">
+          <div class="bit-bank"><div class="bank-title"><span>DPL2 / TB 30–33</span><b id="tensBCD">0000</b></div><div id="tensBits" class="bits"></div></div>
+          <div class="bit-bank"><div class="bank-title"><span>DPL1 / TB 26–29</span><b id="unitsBCD">0000</b></div><div id="unitsBits" class="bits"></div></div>
+        </div>
+        <div class="meta-row"><span class="data-pill" id="outputAck">OUTPUT / READY</span><span class="mini-note">出力は画面で操作せず、ESP32が決定</span></div>
+      </section>
+    </div>
+  </main>
+  <section class="test-area" id="demoTools" aria-label="デモ専用操作">
+    <p>● BROWSER DEMO / PC上のみで動作中<br>ESP32未接続。右側のDPL出力はテスト用に操作できます。</p>
+    <div class="test-buttons"><button id="testCopy" type="button">DSW × 3 → DPL</button><button id="testNext" type="button">DPL +1</button><button id="testReset" type="button">00に戻す</button><button id="testBlank" type="button">BCD=12 消灯テスト</button></div>
+  </section>
+  <section class="footer-grid">
+    <div class="bottom-card"><div class="bottom-title">● SIGNAL TRACE / 動作ログ</div><div class="logs" id="logs" aria-live="polite"></div></div>
+    <div class="bottom-card"><div class="bottom-title">○ TERMINAL REFERENCE / KENTEI作業盤</div><table class="spec-table"><thead><tr><th>機器</th><th>端子 (重み順)</th><th>内容</th></tr></thead><tbody><tr><td>DSW</td><td>13 / 14 / 15 / 16</td><td>1 / 2 / 4 / 8</td></tr><tr><td>DPL1</td><td>26 / 27 / 28 / 29</td><td>1 / 2 / 4 / 8</td></tr><tr><td>DPL2</td><td>30 / 31 / 32 / 33</td><td>10 / 20 / 40 / 80</td></tr></tbody></table></div>
+  </section>
+  <div class="bottomline"><span>KENTEI-HMI / ESP32 + MicroPython / NO EXTERNAL LIBRARIES</span><span id="lastUpdated">LAST UPDATE —</span></div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const DEMO = location.protocol === 'file:' || new URLSearchParams(location.search).has('demo');
+  const $ = id => document.getElementById(id);
+  const SEGMENTS = [
+    '20,10 90,10 79,23 30,23',    // a
+    '93,15 104,27 99,86 87,98 86,34', // b
+    '87,102 99,114 104,173 93,185 86,169', // c
+    '30,177 79,177 90,190 20,190', // d
+    '11,114 23,102 24,168 12,185 6,173', // e
+    '12,15 24,33 24,94 11,99 6,88', // f
+    '30,94 79,94 89,101 79,108 30,108 21,101' // g
+  ];
+  const PATTERNS = [
+    [1,1,1,1,1,1,0], [0,1,1,0,0,0,0], [1,1,0,1,1,0,1], [1,1,1,1,0,0,1],
+    [0,1,1,0,0,1,1], [1,0,1,1,0,1,1], [1,0,1,1,1,1,1], [1,1,1,0,0,0,0],
+    [1,1,1,1,1,1,1], [1,1,1,1,0,1,1]
+  ];
+  let state = { dsw:0, dpl:0, dpl1_bcd:0, dpl2_bcd:0 };
+  let connected = false, busy = false, pollBusy = false;
+  const digitEls = {};
+  const logItems = [];
+  function makeDigits(svg, id) {
+    const ns = 'http://www.w3.org/2000/svg';
+    digitEls[id] = [];
+    SEGMENTS.forEach((coords, i) => {
+      const poly = document.createElementNS(ns, 'polygon');
+      poly.setAttribute('points', coords); poly.setAttribute('class', 'seg');
+      svg.appendChild(poly);digitEls[id].push(poly);
+    });
+  }
+  function renderDigit(id, value) {
+    // KENTEI 10進表示器: 0～9点灯、BCD 10～15は全セグ消灯。
+    // 消灯時も暗いセグの輪郭は残す。
+    const pattern = PATTERNS[value] || [0,0,0,0,0,0,0];
+    pattern.forEach((on,i) => digitEls[id][i].classList.toggle('lit',!!on));
+  }
+  function bits4(v) { return [8,4,2,1].map(w => (v & w) ? '1' : '0').join(''); }
+  function makeBits(parent,weights,offset=0) {
+    weights.forEach((w,i) => {
+      const cell=document.createElement('div');cell.className='bit';
+      const label=document.createElement('span');label.textContent=String(w*offset||w);
+      const lamp=document.createElement('i'); lamp.dataset.mask=String(w);
+      cell.appendChild(lamp);cell.appendChild(label);parent.appendChild(cell);
+    });
+  }
+  function fillBits(id,value) { $(id).querySelectorAll('i').forEach(el => el.classList.toggle('on',(value & +el.dataset.mask)!==0)); }
+  function timeLabel() { return new Date().toLocaleTimeString('ja-JP',{hour12:false}); }
+  function log(type,msg) {
+    logItems.unshift(`<span style="color:#607f8e">${timeLabel()}</span>  <b class="${type==='warn'?'warn':''}">${type.toUpperCase()}</b>  ${msg}`);
+    if(logItems.length>4) logItems.pop();
+    $('logs').innerHTML=logItems.map(x=>`<div class="log-line">${x}</div>`).join('');
+  }
+  function setConnection(kind,label,description) {
+    $('connLed').className='led '+kind;
+    $('connLabel').textContent=label;
+    $('connDesc').textContent=description;
+  }
+  function setPill(id,text,error=false) {$(id).textContent=text;$(id).className='data-pill'+(error?' error':'');}
+  function render() {
+    const d=state.dsw,t=state.dpl2_bcd,u=state.dpl1_bcd;
+    $('dswValue').textContent=String(d);
+    $('wheelPrev').textContent=String((d+9)%10);
+    $('wheelNext').textContent=String((d+1)%10);
+    $('dswBinary').textContent=bits4(d);
+    $('tensBCD').textContent=bits4(t);
+    $('unitsBCD').textContent=bits4(u);
+    $('quickNumbers').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', String(+b.dataset.num === d)));
+    fillBits('dswBits',d); fillBits('tensBits',t);fillBits('unitsBits',u);
+    renderDigit('digitTens',t);renderDigit('digitUnits',u);
+    $('digitTens').setAttribute('aria-label', t>9 ? `DPL2 BCD ${t}：消灯` : `DPL2 十の位 ${t}`);
+    $('digitUnits').setAttribute('aria-label', u>9 ? `DPL1 BCD ${u}：消灯` : `DPL1 一の位 ${u}`);
+    $('lastUpdated').textContent='LAST UPDATE '+timeLabel();
+  }
+  function setDpl(n) { // Demo only: real DPL originates from ESP32.
+    state.dpl = n;state.dpl1_bcd=n%10;state.dpl2_bcd=Math.floor(n/10);render();
+    setPill('outputAck','OUTPUT / DEMO');
+    log('out',`DPL ← ${String(n).padStart(2,'0')} (BCD)`);
+  }
+  function applyRemote(json) {
+    if(!json || !Number.isInteger(json.dsw) || json.dsw<0 || json.dsw>9 ||
+       !Number.isInteger(json.dpl1_bcd) || json.dpl1_bcd<0 || json.dpl1_bcd>15 ||
+       !Number.isInteger(json.dpl2_bcd) || json.dpl2_bcd<0 || json.dpl2_bcd>15) {
+      throw Error('Invalid BCD state');
+    }
+    const t=json.dpl2_bcd, u=json.dpl1_bcd;
+    // dpl=null means at least one digit is blank (not a communication fault).
+    const value=(t>9||u>9) ? null : t*10+u;
+    const changed=state.dpl2_bcd!==t || state.dpl1_bcd!==u;
+    state={dsw:json.dsw,dpl:value,dpl1_bcd:u,dpl2_bcd:t};
+    render();
+    if(t>9 || u>9) {
+      setPill('outputAck','OUTPUT / BCD消灯',true);
+    } else {
+      setPill('outputAck','OUTPUT / SYNCED');
+    }
+    if(changed) {
+      const shown=`${t>9?'—':t}${u>9?'—':u}`;
+      if(t>9 || u>9) {
+        log('warn',`DPL ← ${shown} / BCD ${bits4(t)} ${bits4(u)} （10～15は消灯）`);
+      } else {
+        log('out',`DPL ← ${shown}`);
+      }
+    }
+  }
+  async function changeDsw(value) {
+    if(busy) return;
+    const newValue=(value+10)%10;
+    if(DEMO) {state.dsw=newValue;render();log('in',`DSW → ${newValue} / BCD ${bits4(newValue)}`);return;}
+    if(!connected) {setPill('inputAck','INPUT / 未接続',true);log('warn','DSWは送信されていません');return;}
+    busy=true;setPill('inputAck','INPUT / SENDING…');
+    try {
+      const r=await fetch('/api/dsw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({value:newValue}),cache:'no-store'});
+      if(!r.ok) throw Error(`HTTP ${r.status}`);
+      applyRemote(await r.json());
+      setPill('inputAck','INPUT / ACKNOWLEDGED');
+      log('in',`DSW → ${newValue} / BCD ${bits4(newValue)} (ACK)`);
+    } catch(e) {connected=false;setConnection('bad','通信切断','操作は未反映');setPill('inputAck','INPUT / 未反映',true);log('warn','送信失敗: '+e.message);}
+    finally{busy=false;}
+  }
+  async function poll() {
+    if(DEMO||pollBusy||busy) return;
+    pollBusy=true;
+    try {
+      const controller = new AbortController();
+      const timer=setTimeout(()=>controller.abort(),2200);
+      let result;
+      try {result=await fetch('/api/state',{cache:'no-store',signal:controller.signal});}
+      finally {clearTimeout(timer);}
+      if(!result.ok)throw Error(`HTTP ${result.status}`);
+      const incoming=await result.json();
+      const first=!connected;
+      applyRemote(incoming);connected=true;
+      setConnection('good','ESP32 接続中','HTTP / JSON 受信');
+      if(first){setPill('inputAck','INPUT / SYNCED');log('sys','ESP32と同期しました');}
+    }catch(e){if(connected){log('warn','ESP32と通信できません');}connected=false;setConnection('bad','通信切断','ESP32を確認');setPill('outputAck','OUTPUT / STALE',true);}
+    finally {pollBusy=false;}
+  }
+  makeDigits($('digitTens'),'digitTens');makeDigits($('digitUnits'),'digitUnits');
+  makeBits($('dswBits'),[8,4,2,1]);
+  makeBits($('tensBits'),[8,4,2,1],10);makeBits($('unitsBits'),[8,4,2,1]);
+  for(let n=0;n<10;n++) {
+    const b=document.createElement('button');b.textContent=n;b.type='button';b.dataset.num=n;
+    b.setAttribute('aria-label',`DSWを${n}に設定`);
+    b.addEventListener('click',()=>changeDsw(n));$('quickNumbers').appendChild(b);
+  }
+  $('minus').addEventListener('click',()=>changeDsw(state.dsw-1));
+  $('plus').addEventListener('click',()=>changeDsw(state.dsw+1));
+  document.addEventListener('keydown',e=>{
+    const tag=(document.activeElement||{}).tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA')return;
+    if(e.key==='ArrowUp'){changeDsw(state.dsw+1);e.preventDefault();}
+    if(e.key==='ArrowDown'){changeDsw(state.dsw-1);e.preventDefault();}
+  });
+  $('testCopy').addEventListener('click',()=>setDpl(state.dsw*3));
+  $('testNext').addEventListener('click',()=>setDpl((state.dpl===null?0:state.dpl+1)%100));
+  $('testBlank').addEventListener('click',()=>{
+    state.dpl1_bcd=12; state.dpl2_bcd=4; state.dpl=null;
+    render(); setPill('outputAck','OUTPUT / BCD消灯',true);
+    log('warn','DEMO: DPL1 ← 1100 (12) / 一の位消灯');
+  });
+  $('testReset').addEventListener('click',()=>setDpl(0));
+  render();
+  if(DEMO){$('demoTools').classList.add('active');setConnection('demo','DEMO MODE','ESP32未接続 / UI確認用');setPill('inputAck','INPUT / DEMO');setPill('outputAck','OUTPUT / DEMO');log('sys','ブラウザ単体のデモモード');}
+  else {setConnection('demo','接続確認中','ESP32を探索');poll();setInterval(poll,500);}
+})();
+</script>
+</body>
+</html>

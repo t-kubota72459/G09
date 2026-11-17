@@ -1,0 +1,4 @@
+# 個人・教室のWi-Fi認証情報をGitに登録しない
+wifi_config.py
+__pycache__/
+*.pyc
