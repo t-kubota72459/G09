@@ -49,7 +49,7 @@ class BCDTests(unittest.TestCase):
     def test_friendly_aliases(self):
         h = WebHMI()
         h.dsw = 9
-        self.assertEqual(h.dsw_yomu(), h.read_dsw())
+        self.assertEqual(h.dsw_yomu(), h.dsw_bits_yomu())
         h.dpl_hyouji(27)
         self.assertEqual(h.get_state()['dpl'], 27)
 
@@ -157,7 +157,7 @@ class StudentBitsTests(unittest.TestCase):
     def test_legacy_decimal_and_terminal_order_unchanged(self):
         h = WebHMI()
         h.dsw = 3
-        self.assertEqual(h.dsw_yomu(), 3)
+        self.assertEqual(h.read_dsw(), 3)
         self.assertEqual(h.read_dsw_bits(), (1, 1, 0, 0))  # TB13..16
         h.dpl_hyouji(42)
         self.assertEqual(h.get_state()['dpl'], 42)
@@ -251,7 +251,7 @@ class HTTPTests(unittest.TestCase):
         with urllib.request.urlopen(req, timeout=3) as r:
             self.assertEqual(r.status, 200)
             self.assertIn(b'"dsw":7', r.read())
-        self.assertEqual(self.hmi.dsw_yomu(), 7)
+        self.assertEqual(self.hmi.read_dsw(), 7)
         self.assertEqual(self.hmi.read_dsw_bits(), (1, 1, 1, 0))
 
     def test_web_dsw_and_bit_dpl_via_http(self):
@@ -288,13 +288,13 @@ class HTTPTests(unittest.TestCase):
         self.assertFalse(state['dpl2_blank'])
 
     def test_invalid_post_no_change(self):
-        old = self.hmi.dsw_yomu()
+        old = self.hmi.read_dsw()
         for body in (b'{"value":12}', b'{"value":true}', b'{"value":-1}', b'{"wrong":3}'):
             req = urllib.request.Request(self.url('/api/dsw'), data=body, method='POST')
             with self.assertRaises(urllib.error.HTTPError) as err:
                 urllib.request.urlopen(req, timeout=3)
             self.assertEqual(err.exception.code, 400)
-            self.assertEqual(self.hmi.dsw_yomu(), old)
+            self.assertEqual(self.hmi.read_dsw(), old)
 
     def test_dpl_state(self):
         self.hmi.dpl_hyouji(42)

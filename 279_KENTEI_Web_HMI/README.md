@@ -32,7 +32,7 @@ ESP32起動時にDHCPで取得したIPとURLをThonnyのShellに表示します�
 | メソッド | 動作 |
 |---|---|
 | `hmi.web_shori()` | HTTP要求が来ていたら最大1件処理 |
-| `hmi.dsw_bits_yomu()` | DSWの4ビットを `[8,4,2,1]` の順で返す |
+| `hmi.dsw_yomu()` | DSWの4ビットを `[8,4,2,1]` の順で返す |
 | `hmi.dpl1_hyouji(bits)` | DPL1（一の位）にMSB先頭4ビットを出力 |
 | `hmi.dpl2_hyouji(bits)` | DPL2（十の位）にMSB先頭4ビットを出力 |
 
@@ -81,7 +81,7 @@ hmi.dpl1_hyouji([0, 1, 0, 0])  # DPL1: 4 -> 再点灯
 以下はこれまでどおり使えます。
 
 ```python
-hmi.dsw_yomu()       # 0～9の整数
+hmi.read_dsw()       # 0～9の整数
 hmi.dpl_hyouji(42)   # 00～99の整数
 ```
 
