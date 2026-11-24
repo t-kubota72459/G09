@@ -139,8 +139,8 @@ class WebHMI:
         return self.poll()
 
     def dsw_yomu(self):
-        """WebのDSW設定を十進数0～9で読む。"""
-        return self.read_dsw()
+        """dsw_bits_yomu() の別名"""
+        return self.dsw_bits_yomu()
 
     def dpl_hyouji(self, number):
         """WebのDPLへ十進数00～99を表示する（従来どおり）。"""
