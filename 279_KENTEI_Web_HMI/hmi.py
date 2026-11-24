@@ -369,3 +369,10 @@ class WebHMI:
                 pass
         else:
             self._json(client, '404 Not Found', {'error': 'Not found'})
+
+    def wait_ms(self, ms):
+        start = time.ticks_ms()
+
+        while time.ticks_diff(time.ticks_ms(), start) < ms:
+            self.web_shori()
+            time.sleep_ms(10)
